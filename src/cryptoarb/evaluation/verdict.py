@@ -10,7 +10,10 @@ Importing this module has no side effects.
 
 from __future__ import annotations
 
+import math
 from enum import StrEnum
+
+from cryptoarb._exceptions import ValidationError
 
 
 class Verdict(StrEnum):
@@ -80,7 +83,44 @@ def derive_verdict(
         If ``ci_low_bps > ci_high_bps``, or ``noise_bps``/``feasible_bps`` are
         negative, or any input is non-finite.
     """
-    raise NotImplementedError
+    net = float(net_bps)
+    lo = float(ci_low_bps)
+    hi = float(ci_high_bps)
+    noise = float(noise_bps)
+    feasible = float(feasible_bps)
+
+    for label, value in (
+        ("net_bps", net),
+        ("ci_low_bps", lo),
+        ("ci_high_bps", hi),
+        ("noise_bps", noise),
+        ("feasible_bps", feasible),
+    ):
+        if not math.isfinite(value):
+            raise ValidationError(f"derive_verdict: {label} must be finite, got {value}.")
+
+    if lo > hi:
+        raise ValidationError(
+            f"derive_verdict requires ci_low_bps <= ci_high_bps, got {lo} > {hi}."
+        )
+    if noise < 0.0:
+        raise ValidationError(f"derive_verdict requires noise_bps >= 0, got {noise}.")
+    if feasible < 0.0:
+        raise ValidationError(f"derive_verdict requires feasible_bps >= 0, got {feasible}.")
+
+    # Honest null FIRST: a feasible claim is structurally impossible whenever the
+    # net edge is at/below the noise band OR its lower confidence bound includes
+    # zero. This branch is what keeps the headline from ever over-claiming.
+    if net <= noise or lo <= 0.0:
+        return Verdict.NO_FEASIBLE_EDGE
+
+    # Clearly positive AND its lower bound is strictly above zero AND it clears
+    # the (higher) feasibility threshold: the rare genuinely feasible edge.
+    if net >= feasible and lo > 0.0:
+        return Verdict.FEASIBLE_EDGE
+
+    # Positive, above noise, but below the feasibility threshold: do-not-trade.
+    return Verdict.MARGINAL
 
 
 def is_within_noise(net_bps: float, noise_bps: float = 1.0) -> bool:
@@ -103,4 +143,10 @@ def is_within_noise(net_bps: float, noise_bps: float = 1.0) -> bool:
     ValidationError
         If ``noise_bps`` is negative or ``net_bps`` is non-finite.
     """
-    raise NotImplementedError
+    net = float(net_bps)
+    noise = float(noise_bps)
+    if not math.isfinite(net):
+        raise ValidationError(f"is_within_noise: net_bps must be finite, got {net}.")
+    if not math.isfinite(noise) or noise < 0.0:
+        raise ValidationError(f"is_within_noise requires noise_bps >= 0, got {noise}.")
+    return abs(net) <= noise

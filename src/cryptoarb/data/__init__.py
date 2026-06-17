@@ -12,6 +12,7 @@ from cryptoarb.data.ccxt_source import (
     DataSourcePref,
     FetchConfig,
     FetchResult,
+    UpstreamError,
     fetch_books,
 )
 
@@ -21,5 +22,6 @@ __all__ = [
     "DataSourcePref",
     "FetchConfig",
     "FetchResult",
+    "UpstreamError",
     "fetch_books",
 ]

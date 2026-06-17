@@ -9,8 +9,14 @@ taker on BOTH sides by default. Schedules are loaded from the reference
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
+
+from cryptoarb._exceptions import ValidationError
+from cryptoarb.costs._profiles import load_profile
+
+_BPS_PER_UNIT = 1.0e4
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,16 +40,22 @@ class FeeSchedule:
     @property
     def taker_bps(self) -> float:
         """Taker fee in basis points (``taker * 1e4``)."""
-        raise NotImplementedError
+        return self.taker * _BPS_PER_UNIT
 
     @property
     def maker_bps(self) -> float:
         """Maker fee in basis points (``maker * 1e4``)."""
-        raise NotImplementedError
+        return self.maker * _BPS_PER_UNIT
 
     def to_dict(self) -> dict[str, Any]:
         """Return a plain, JSON-serializable ``dict`` of this schedule."""
-        raise NotImplementedError
+        return {
+            "venue": self.venue,
+            "maker": self.maker,
+            "taker": self.taker,
+            "maker_bps": self.maker_bps,
+            "taker_bps": self.taker_bps,
+        }
 
 
 def round_trip_taker_bps(buy: FeeSchedule, sell: FeeSchedule) -> float:
@@ -64,7 +76,27 @@ def round_trip_taker_bps(buy: FeeSchedule, sell: FeeSchedule) -> float:
     float
         The summed round-trip taker fee in basis points.
     """
-    raise NotImplementedError
+    return buy.taker_bps + sell.taker_bps
+
+
+def _build_fee_schedule(venue: str, raw: object) -> FeeSchedule:
+    """Validate and construct a single :class:`FeeSchedule` from raw profile data."""
+    if not isinstance(raw, Mapping):
+        raise ValidationError(f"fee schedule for venue {venue!r} must be a mapping.")
+    try:
+        maker = float(raw["maker"])
+        taker = float(raw["taker"])
+    except KeyError as exc:
+        raise ValidationError(
+            f"fee schedule for venue {venue!r} is missing key {exc.args[0]!r}."
+        ) from exc
+    except (TypeError, ValueError) as exc:
+        raise ValidationError(f"fee schedule for venue {venue!r} has a non-numeric rate.") from exc
+    if maker < 0.0 or taker < 0.0:
+        raise ValidationError(
+            f"fee schedule for venue {venue!r} has a negative rate (maker={maker}, taker={taker})."
+        )
+    return FeeSchedule(venue=venue, maker=maker, taker=taker)
 
 
 def load_fee_schedules(profile: str = "default") -> dict[str, FeeSchedule]:
@@ -89,4 +121,8 @@ def load_fee_schedules(profile: str = "default") -> dict[str, FeeSchedule]:
     ValidationError
         If ``profile`` is unknown or the file is malformed / has a negative rate.
     """
-    raise NotImplementedError
+    data = load_profile(profile)
+    raw_fees = data.get("fees")
+    if not isinstance(raw_fees, Mapping) or not raw_fees:
+        raise ValidationError(f"profile {profile!r} has no usable 'fees' section.")
+    return {str(venue): _build_fee_schedule(str(venue), raw) for venue, raw in raw_fees.items()}

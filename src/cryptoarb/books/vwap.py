@@ -12,9 +12,12 @@ Importing this module has no side effects.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import TYPE_CHECKING, Any
+
+from cryptoarb._exceptions import BookError, ValidationError
 
 if TYPE_CHECKING:
     from cryptoarb.books.model import OrderBook
@@ -65,7 +68,15 @@ class VWAPResult:
 
     def to_dict(self) -> dict[str, Any]:
         """Return a plain, JSON-serializable ``dict`` of this result."""
-        raise NotImplementedError
+        return {
+            "side": self.side.value,
+            "target_notional": float(self.target_notional),
+            "filled_notional": float(self.filled_notional),
+            "avg_price": float(self.avg_price),
+            "filled_base": float(self.filled_base),
+            "fully_filled": bool(self.fully_filled),
+            "levels_consumed": int(self.levels_consumed),
+        }
 
 
 def vwap(book: OrderBook, side: Side, target_notional: float) -> VWAPResult:
@@ -104,4 +115,39 @@ def vwap(book: OrderBook, side: Side, target_notional: float) -> VWAPResult:
     BookError
         If the relevant ladder is empty.
     """
-    raise NotImplementedError
+    if not (target_notional > 0.0):
+        raise ValidationError(
+            f"vwap: target_notional must be strictly positive, got {target_notional}."
+        )
+
+    ladder = book.asks if side is Side.BUY else book.bids
+    if not ladder:
+        empty_side = "ask" if side is Side.BUY else "bid"
+        raise BookError(f"{book.venue} {book.symbol}: {empty_side} side is empty; cannot quote.")
+
+    remaining = float(target_notional)
+    filled_notional = 0.0
+    filled_base = 0.0
+    levels_consumed = 0
+    for price, size in ladder:
+        if remaining <= 0.0:
+            break
+        level_notional = price * size
+        take_notional = min(remaining, level_notional)
+        # Base filled at this level is the notional taken divided by the level price.
+        filled_base += take_notional / price
+        filled_notional += take_notional
+        remaining -= take_notional
+        levels_consumed += 1
+
+    fully_filled = remaining <= 0.0
+    avg_price = filled_notional / filled_base if filled_base > 0.0 else math.nan
+    return VWAPResult(
+        side=side,
+        target_notional=float(target_notional),
+        filled_notional=filled_notional,
+        avg_price=avg_price,
+        filled_base=filled_base,
+        fully_filled=fully_filled,
+        levels_consumed=levels_consumed,
+    )

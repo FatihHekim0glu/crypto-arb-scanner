@@ -12,7 +12,11 @@ Importing this module has no side effects.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from itertools import permutations
 from typing import TYPE_CHECKING, Any
+
+from cryptoarb._exceptions import ValidationError
+from cryptoarb.books.vwap import Side, vwap
 
 if TYPE_CHECKING:
     from cryptoarb.books.model import OrderBook
@@ -48,7 +52,36 @@ class CrossLeg:
 
     def to_dict(self) -> dict[str, Any]:
         """Return a plain, JSON-serializable ``dict`` of this leg."""
-        raise NotImplementedError
+        return {
+            "buy_venue": self.buy_venue,
+            "sell_venue": self.sell_venue,
+            "buy_vwap": float(self.buy_vwap),
+            "sell_vwap": float(self.sell_vwap),
+            "fillable_notional": float(self.fillable_notional),
+            "gross_bps": float(self.gross_bps),
+        }
+
+
+def _cross_leg(buy_book: OrderBook, sell_book: OrderBook, target_notional: float) -> CrossLeg:
+    """Price one ordered (buy, sell) venue pair into a :class:`CrossLeg`.
+
+    Walks the buyer's asks and the seller's bids to ``target_notional`` and
+    folds the two VWAPs into an executable gross spread. The fillable notional is
+    the binding minimum of the two legs' actually-filled notionals, so a thin
+    book on either side caps the opportunity honestly.
+    """
+    buy = vwap(buy_book, Side.BUY, target_notional)
+    sell = vwap(sell_book, Side.SELL, target_notional)
+    gross_bps = 1e4 * (sell.avg_price - buy.avg_price) / buy.avg_price
+    fillable_notional = min(buy.filled_notional, sell.filled_notional)
+    return CrossLeg(
+        buy_venue=buy_book.venue,
+        sell_venue=sell_book.venue,
+        buy_vwap=buy.avg_price,
+        sell_vwap=sell.avg_price,
+        fillable_notional=fillable_notional,
+        gross_bps=gross_bps,
+    )
 
 
 def best_cross_leg(books: dict[str, OrderBook], target_notional: float) -> CrossLeg:
@@ -77,12 +110,26 @@ def best_cross_leg(books: dict[str, OrderBook], target_notional: float) -> Cross
         If fewer than two venues are supplied or ``target_notional`` is not
         strictly positive.
     """
-    raise NotImplementedError
+    if not (target_notional > 0.0):
+        raise ValidationError(
+            f"best_cross_leg: target_notional must be strictly positive, got {target_notional}."
+        )
+    if len(books) < 2:
+        raise ValidationError(f"best_cross_leg: need at least two venues, got {len(books)}.")
+
+    # Evaluate every ordered (buy, sell) venue pair and keep the richest spread.
+    # Iterating sorted venue names makes the choice deterministic when two pairs
+    # tie on ``gross_bps`` (e.g. the symmetric consistent-book null). With >= 2
+    # venues ``permutations`` yields >= 2 pairs, so ``max`` always has input.
+    venues = sorted(books)
+    legs = (
+        _cross_leg(books[buy_venue], books[sell_venue], target_notional)
+        for buy_venue, sell_venue in permutations(venues, 2)
+    )
+    return max(legs, key=lambda leg: leg.gross_bps)
 
 
-def cross_gross_bps(
-    buy_book: OrderBook, sell_book: OrderBook, target_notional: float
-) -> float:
+def cross_gross_bps(buy_book: OrderBook, sell_book: OrderBook, target_notional: float) -> float:
     """Return the executable cross-exchange gross spread (bps) for one venue pair.
 
     Walks ``buy_book``'s asks and ``sell_book``'s bids to ``target_notional`` and
@@ -110,4 +157,8 @@ def cross_gross_bps(
     BookError
         If either required ladder is empty.
     """
-    raise NotImplementedError
+    if not (target_notional > 0.0):
+        raise ValidationError(
+            f"cross_gross_bps: target_notional must be strictly positive, got {target_notional}."
+        )
+    return _cross_leg(buy_book, sell_book, target_notional).gross_bps

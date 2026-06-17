@@ -78,8 +78,10 @@ def _norm_ppf(p: float) -> float:
     elif p <= p_high:
         q = p - 0.5
         r = q * q
-        x = (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / (
-            ((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1.0
+        x = (
+            (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5])
+            * q
+            / (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1.0)
         )
     else:
         q = math.sqrt(-2.0 * math.log(1.0 - p))

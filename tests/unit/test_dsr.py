@@ -42,9 +42,7 @@ def test_psr_rejects_nonpositive_variance_term() -> None:
 @pytest.mark.unit
 def test_dsr_single_trial_reduces_to_psr_vs_zero() -> None:
     """With one trial the DSR collapses to the plain PSR against zero."""
-    dsr = deflated_sharpe_ratio(
-        0.2, n_obs=200, n_trials=1, variance_of_trial_sharpes=0.3
-    )
+    dsr = deflated_sharpe_ratio(0.2, n_obs=200, n_trials=1, variance_of_trial_sharpes=0.3)
     psr = probabilistic_sharpe_ratio(0.2, n_obs=200, benchmark_sharpe=0.0)
     assert dsr == pytest.approx(psr, abs=1e-12)
 

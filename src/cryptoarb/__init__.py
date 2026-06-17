@@ -88,6 +88,12 @@ from cryptoarb.plots import (
     spread_distribution_figure,
     waterfall_figure,
 )
+from cryptoarb.scan import (
+    ScanResult,
+    ScanSummary,
+    run_scan,
+    scan_figures,
+)
 
 __version__ = "0.1.0"
 
@@ -113,6 +119,8 @@ __all__ = [
     "NetEdgeStats",
     "OrderBook",
     "RunManifest",
+    "ScanResult",
+    "ScanSummary",
     "Side",
     "SyntheticConfig",
     "TransferSchedule",
@@ -148,6 +156,8 @@ __all__ = [
     "no_arb_residual",
     "probabilistic_sharpe_ratio",
     "round_trip_taker_bps",
+    "run_scan",
+    "scan_figures",
     "spawn_substreams",
     "spread_distribution_figure",
     "synthetic_book",

@@ -24,12 +24,8 @@ from cryptoarb.evaluation.dsr import deflated_sharpe_ratio
 def test_dsr_monotone_non_increasing_in_trials(n_trials_a: int, n_trials_b: int) -> None:
     """More trials never increases the deflated Sharpe (selection-bias guard)."""
     lo, hi = sorted((n_trials_a, n_trials_b))
-    dsr_lo = deflated_sharpe_ratio(
-        0.15, n_obs=250, n_trials=lo, variance_of_trial_sharpes=0.2
-    )
-    dsr_hi = deflated_sharpe_ratio(
-        0.15, n_obs=250, n_trials=hi, variance_of_trial_sharpes=0.2
-    )
+    dsr_lo = deflated_sharpe_ratio(0.15, n_obs=250, n_trials=lo, variance_of_trial_sharpes=0.2)
+    dsr_hi = deflated_sharpe_ratio(0.15, n_obs=250, n_trials=hi, variance_of_trial_sharpes=0.2)
     assert dsr_hi <= dsr_lo + 1e-12
 
 

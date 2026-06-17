@@ -16,6 +16,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from cryptoarb._exceptions import InsufficientDataError, ValidationError
+from cryptoarb._validation import ensure_series
+from cryptoarb.evaluation.dsr import (
+    deflated_sharpe_ratio,
+    probabilistic_sharpe_ratio,
+)
+
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
@@ -54,7 +61,14 @@ class NetEdgeStats:
 
     def to_dict(self) -> dict[str, Any]:
         """Return a plain, JSON-serializable ``dict`` of these stats."""
-        raise NotImplementedError
+        return {
+            "mean_bps": self.mean_bps,
+            "sharpe": self.sharpe,
+            "psr": self.psr,
+            "dsr": self.dsr,
+            "n_obs": self.n_obs,
+            "n_trials": self.n_trials,
+        }
 
 
 @dataclass(frozen=True, slots=True)
@@ -74,7 +88,10 @@ class CostSensitivityPoint:
 
     def to_dict(self) -> dict[str, Any]:
         """Return a plain, JSON-serializable ``dict`` of this point."""
-        raise NotImplementedError
+        return {
+            "extra_cost_bps": self.extra_cost_bps,
+            "net_bps": self.net_bps,
+        }
 
 
 def effective_n_trials(pair_legs: int, fee_grid_points: int) -> int:
@@ -102,7 +119,13 @@ def effective_n_trials(pair_legs: int, fee_grid_points: int) -> int:
     ValidationError
         If either factor is less than ``1``.
     """
-    raise NotImplementedError
+    legs = int(pair_legs)
+    grid = int(fee_grid_points)
+    if legs < 1:
+        raise ValidationError(f"effective_n_trials requires pair_legs >= 1, got {legs}.")
+    if grid < 1:
+        raise ValidationError(f"effective_n_trials requires fee_grid_points >= 1, got {grid}.")
+    return legs * grid
 
 
 def net_edge_stats(
@@ -144,7 +167,70 @@ def net_edge_stats(
     InsufficientDataError
         If fewer than two net-edge observations are supplied.
     """
-    raise NotImplementedError
+    if variance_of_trial_sharpes < 0.0:
+        raise ValidationError(
+            "net_edge_stats requires variance_of_trial_sharpes >= 0, "
+            f"got {variance_of_trial_sharpes}."
+        )
+
+    # Coerce to a clean, finite 1-D float series (raises ValidationError on
+    # empty / NaN). Multiplicity accounting is validated up front.
+    series = ensure_series(net_edge_bps, name="net_edge_bps")
+    n_trials = effective_n_trials(pair_legs, fee_grid_points)
+
+    n_obs = int(series.shape[0])
+    if n_obs < 2:
+        raise InsufficientDataError(
+            f"net_edge_stats requires at least two net-edge observations, got {n_obs}."
+        )
+
+    # HONEST-MULTIPLICITY GUARD: whenever more than one configuration was
+    # scanned the effective-trials count MUST exceed one, so the DSR deflation
+    # cannot be silently defeated by an under-count of 1. This is a defensive
+    # belt-and-suspenders check: ``effective_n_trials`` already forbids any
+    # factor < 1, so a multiplicity > 1 implies ``n_trials >= 2`` and this raise
+    # is unreachable in normal operation.
+    if (pair_legs > 1 or fee_grid_points > 1) and n_trials <= 1:  # pragma: no cover
+        raise ValidationError(
+            "net_edge_stats: effective n_trials must exceed 1 when more than one "
+            f"configuration is scanned (pair_legs={pair_legs}, "
+            f"fee_grid_points={fee_grid_points}, n_trials={n_trials})."
+        )
+
+    mean_bps = float(series.mean())
+    # Per-observation (non-annualized) Sharpe = mean / sample-std (ddof=1). A
+    # zero-dispersion series carries no statistical edge signal, so its Sharpe is
+    # defined as 0 (the PSR/DSR then evaluate against the zero/benchmark cleanly).
+    std = float(series.std(ddof=1))
+    sharpe = 0.0 if std == 0.0 else mean_bps / std
+
+    # Curated pandas suppression: pandas-stubs types Series.skew/kurt with a broad
+    # scalar union; the float64 Series we coerced always returns a real scalar.
+    skew = float(series.skew()) if n_obs >= 3 else 0.0  # type: ignore[arg-type]
+    # pandas ``kurt`` returns EXCESS kurtosis; the PSR/DSR want FULL kurtosis.
+    excess_kurt = float(series.kurt()) if n_obs >= 4 else 0.0  # type: ignore[arg-type]
+    kurtosis = excess_kurt + 3.0
+
+    psr = probabilistic_sharpe_ratio(
+        sharpe, n_obs=n_obs, skew=skew, kurtosis=kurtosis, benchmark_sharpe=0.0
+    )
+    dsr = deflated_sharpe_ratio(
+        sharpe,
+        n_obs=n_obs,
+        n_trials=n_trials,
+        variance_of_trial_sharpes=variance_of_trial_sharpes,
+        skew=skew,
+        kurtosis=kurtosis,
+    )
+
+    return NetEdgeStats(
+        mean_bps=mean_bps,
+        sharpe=sharpe,
+        psr=psr,
+        dsr=dsr,
+        n_obs=n_obs,
+        n_trials=n_trials,
+    )
 
 
 def cost_sensitivity_grid(
@@ -177,4 +263,15 @@ def cost_sensitivity_grid(
     ValidationError
         If the grid contains a negative value.
     """
-    raise NotImplementedError
+    gross = float(gross_bps)
+    baseline = float(baseline_cost_bps)
+    points: list[CostSensitivityPoint] = []
+    for raw_extra in extra_cost_grid:
+        extra = float(raw_extra)
+        if extra < 0.0:
+            raise ValidationError(
+                f"cost_sensitivity_grid: extra cost must be non-negative, got {extra}."
+            )
+        net = gross - baseline - extra
+        points.append(CostSensitivityPoint(extra_cost_bps=extra, net_bps=net))
+    return tuple(points)

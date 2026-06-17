@@ -13,11 +13,15 @@ Importing this module has no side effects.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-if TYPE_CHECKING:
-    from cryptoarb.costs.fees import FeeSchedule
-    from cryptoarb.costs.transfer import TransferSchedule
+from cryptoarb._exceptions import ValidationError
+from cryptoarb.costs.fees import FeeSchedule, load_fee_schedules, round_trip_taker_bps
+from cryptoarb.costs.transfer import (
+    TransferSchedule,
+    load_transfer_schedules,
+    transfer_cost_bps,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,11 +61,19 @@ class CompositeCost:
         ValidationError
             If ``profile`` is unknown or a schedule file is malformed.
         """
-        raise NotImplementedError
+        return cls(
+            profile=profile,
+            fees=load_fee_schedules(profile),
+            transfers=load_transfer_schedules(profile),
+        )
 
     def to_dict(self) -> dict[str, Any]:
         """Return a plain, JSON-serializable ``dict`` of this bundle."""
-        raise NotImplementedError
+        return {
+            "profile": self.profile,
+            "fees": {venue: fee.to_dict() for venue, fee in self.fees.items()},
+            "transfers": {asset: transfer.to_dict() for asset, transfer in self.transfers.items()},
+        }
 
 
 @dataclass(frozen=True, slots=True)
@@ -85,7 +97,11 @@ class WaterfallStage:
 
     def to_dict(self) -> dict[str, Any]:
         """Return a plain, JSON-serializable ``dict`` of this stage."""
-        raise NotImplementedError
+        return {
+            "label": self.label,
+            "delta_bps": self.delta_bps,
+            "running_bps": self.running_bps,
+        }
 
 
 @dataclass(frozen=True, slots=True)
@@ -111,7 +127,12 @@ class Waterfall:
 
     def to_dict(self) -> dict[str, Any]:
         """Return a plain, JSON-serializable ``dict`` of this waterfall."""
-        raise NotImplementedError
+        return {
+            "gross_bps": self.gross_bps,
+            "net_bps": self.net_bps,
+            "stages": [stage.to_dict() for stage in self.stages],
+            "dominant_cost_leg": self.dominant_cost_leg,
+        }
 
 
 def build_waterfall(
@@ -158,4 +179,43 @@ def build_waterfall(
     ValidationError
         If ``notional_usd`` or ``asset_price_usd`` is not strictly positive.
     """
-    raise NotImplementedError
+    if not notional_usd > 0.0:
+        raise ValidationError(f"notional_usd must be strictly positive, got {notional_usd}.")
+    if not asset_price_usd > 0.0:
+        raise ValidationError(f"asset_price_usd must be strictly positive, got {asset_price_usd}.")
+
+    gross = float(gross_bps)
+    stages: list[WaterfallStage] = [
+        WaterfallStage(label="gross", delta_bps=gross, running_bps=gross)
+    ]
+
+    # Cost stages are NEVER zeroed: round-trip taker on both legs is always paid.
+    fee_cost_bps = round_trip_taker_bps(buy=buy_fee, sell=sell_fee)
+    running = gross - fee_cost_bps
+    stages.append(WaterfallStage(label="taker_fees", delta_bps=-fee_cost_bps, running_bps=running))
+
+    # Track cost magnitudes so the dominant leg is the single largest cost.
+    cost_magnitudes: dict[str, float] = {"taker_fees": fee_cost_bps}
+
+    if transfer is not None:
+        transfer_bps = transfer_cost_bps(
+            transfer, notional_usd=notional_usd, asset_price_usd=asset_price_usd
+        )
+        running = running - transfer_bps
+        stages.append(
+            WaterfallStage(label="transfer", delta_bps=-transfer_bps, running_bps=running)
+        )
+        cost_magnitudes["transfer"] = transfer_bps
+
+    net = running
+    stages.append(WaterfallStage(label="net", delta_bps=net, running_bps=net))
+
+    # Dominant cost leg = the label of the single largest cost by magnitude.
+    dominant_cost_leg = max(cost_magnitudes, key=lambda label: cost_magnitudes[label])
+
+    return Waterfall(
+        gross_bps=gross,
+        net_bps=net,
+        stages=tuple(stages),
+        dominant_cost_leg=dominant_cost_leg,
+    )

@@ -12,8 +12,14 @@ this module has no side effects.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
+
+from cryptoarb._exceptions import ValidationError
+from cryptoarb.costs._profiles import load_profile
+
+_BPS_PER_UNIT = 1.0e4
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,9 +45,20 @@ class TransferSchedule:
     network_minutes: float
     latency_bps_per_min: float
 
+    @property
+    def latency_bps(self) -> float:
+        """Notional-invariant latency penalty (``network_minutes * latency_bps_per_min``)."""
+        return self.network_minutes * self.latency_bps_per_min
+
     def to_dict(self) -> dict[str, Any]:
         """Return a plain, JSON-serializable ``dict`` of this schedule."""
-        raise NotImplementedError
+        return {
+            "asset": self.asset,
+            "withdrawal_flat": self.withdrawal_flat,
+            "network_minutes": self.network_minutes,
+            "latency_bps_per_min": self.latency_bps_per_min,
+            "latency_bps": self.latency_bps,
+        }
 
 
 def transfer_cost_bps(
@@ -73,7 +90,42 @@ def transfer_cost_bps(
     ValidationError
         If ``notional_usd`` or ``asset_price_usd`` is not strictly positive.
     """
-    raise NotImplementedError
+    if not notional_usd > 0.0:
+        raise ValidationError(f"notional_usd must be strictly positive, got {notional_usd}.")
+    if not asset_price_usd > 0.0:
+        raise ValidationError(f"asset_price_usd must be strictly positive, got {asset_price_usd}.")
+    withdrawal_bps = _BPS_PER_UNIT * schedule.withdrawal_flat * asset_price_usd / notional_usd
+    return withdrawal_bps + schedule.latency_bps
+
+
+def _build_transfer_schedule(asset: str, raw: object) -> TransferSchedule:
+    """Validate and construct a single :class:`TransferSchedule` from raw profile data."""
+    if not isinstance(raw, Mapping):
+        raise ValidationError(f"transfer schedule for asset {asset!r} must be a mapping.")
+    try:
+        withdrawal_flat = float(raw["withdrawal_flat"])
+        network_minutes = float(raw["network_minutes"])
+        latency_bps_per_min = float(raw["latency_bps_per_min"])
+    except KeyError as exc:
+        raise ValidationError(
+            f"transfer schedule for asset {asset!r} is missing key {exc.args[0]!r}."
+        ) from exc
+    except (TypeError, ValueError) as exc:
+        raise ValidationError(
+            f"transfer schedule for asset {asset!r} has a non-numeric value."
+        ) from exc
+    if withdrawal_flat < 0.0 or network_minutes < 0.0 or latency_bps_per_min < 0.0:
+        raise ValidationError(
+            f"transfer schedule for asset {asset!r} has a negative value "
+            f"(withdrawal_flat={withdrawal_flat}, network_minutes={network_minutes}, "
+            f"latency_bps_per_min={latency_bps_per_min})."
+        )
+    return TransferSchedule(
+        asset=asset,
+        withdrawal_flat=withdrawal_flat,
+        network_minutes=network_minutes,
+        latency_bps_per_min=latency_bps_per_min,
+    )
 
 
 def load_transfer_schedules(profile: str = "default") -> dict[str, TransferSchedule]:
@@ -98,4 +150,11 @@ def load_transfer_schedules(profile: str = "default") -> dict[str, TransferSched
     ValidationError
         If ``profile`` is unknown or the file is malformed / has a negative value.
     """
-    raise NotImplementedError
+    data = load_profile(profile)
+    raw_transfers = data.get("transfers")
+    if not isinstance(raw_transfers, Mapping) or not raw_transfers:
+        raise ValidationError(f"profile {profile!r} has no usable 'transfers' section.")
+    return {
+        str(asset): _build_transfer_schedule(str(asset), raw)
+        for asset, raw in raw_transfers.items()
+    }
