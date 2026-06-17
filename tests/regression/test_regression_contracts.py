@@ -32,3 +32,24 @@ def test_verdict_entry_point_exists() -> None:
     from cryptoarb.evaluation.verdict import derive_verdict
 
     assert callable(derive_verdict)
+
+
+@pytest.mark.regression
+def test_depth_gate_forces_honest_null_when_size_exceeds_depth(
+    dislocated_books: dict,
+) -> None:
+    """A notional far larger than book depth is never reported as executable.
+
+    ``dislocated_books`` carries a genuine positive gross spread, so at a small
+    size it can read as marginal/feasible. But when the requested notional dwarfs
+    the available depth, only a sliver is fillable and the headline net edge is
+    not achievable at size — the depth gate must force ``no_feasible_edge``.
+    """
+    from cryptoarb import run_scan
+
+    venues = list(dislocated_books.keys())
+    huge_notional = 1_000_000_000.0
+    result = run_scan("BTC/USDT", venues, huge_notional, books=dislocated_books)
+
+    assert result.summary.fillable_notional < huge_notional
+    assert result.summary.verdict == Verdict.NO_FEASIBLE_EDGE

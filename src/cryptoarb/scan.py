@@ -47,6 +47,12 @@ if TYPE_CHECKING:
     from cryptoarb.costs.transfer import TransferSchedule
     from cryptoarb.data.ccxt_source import DataSource
 
+#: Minimum fraction of the requested notional that must be fillable across both
+#: legs for a positive net edge to count as executable. Below this the requested
+#: size overwhelms book depth and the verdict is forced to the honest null,
+#: regardless of the thin-fill spread (see the depth gate in ``run_scan``).
+_MIN_FILL_RATIO: float = 0.5
+
 #: Default cost-sensitivity sweep (extra bps on top of the baseline waterfall).
 #: This is the data behind the "net edge collapses after fees + depth + transfer"
 #: caption and the cost-sensitivity figure.
@@ -357,6 +363,16 @@ def run_scan(
         noise_bps=noise_bps,
         feasible_bps=feasible_bps,
     )
+
+    # Depth gate (anti-overstatement): a spread you can fill only a sliver of is
+    # not an executable edge at the requested size. When VWAP saturates because
+    # the requested notional exceeds book depth, ``fillable_notional`` is far
+    # below ``notional_usd`` while ``net_bps`` keeps reporting the thin-fill
+    # spread. Force the honest null in that case so the headline never implies an
+    # executable edge for a size the book cannot support.
+    fill_ratio = best_leg.fillable_notional / notional_usd if notional_usd > 0.0 else 0.0
+    if fill_ratio < _MIN_FILL_RATIO:
+        verdict = Verdict.NO_FEASIBLE_EDGE
 
     # --- 4) Cost-sensitivity sweep off the best pair's baseline cost. ---
     baseline_cost_bps = best_leg.gross_bps - waterfall.net_bps
