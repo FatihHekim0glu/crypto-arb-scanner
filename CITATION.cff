@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "crypto-arb-scanner: a fee-, depth-, and transfer-cost-aware gross-to-net decomposition of cross-exchange and triangular crypto spreads"
+abstract: >-
+  A pure, typed Python tool that decomposes cross-exchange and triangular
+  crypto-currency arbitrage spreads into a gross-to-net waterfall. Spreads are
+  priced at executable depth (VWAP-walked L2 order books for a realistic
+  notional, never top-of-book) and charged real round-trip taker fees plus
+  withdrawal/network transfer costs. The honest headline is the gross-to-net
+  collapse: on liquid pairs the net executable edge falls to roughly zero or
+  negative after costs, and residual positives are stale-quote / latency-arbitrage
+  artifacts a retail REST client cannot capture. The verdict is a pure function of
+  the net-edge inference, structurally unable to claim a feasible edge on the null.
+  Built and tested entirely on a deterministic synthetic consistent-order-book
+  generator; the live ccxt path always degrades to synthetic.
+type: software
+version: 0.1.0
+date-released: "2026-06-17"
+license: MIT
+repository-code: "https://github.com/FatihHekim0glu/crypto-arb-scanner"
+url: "https://fatihhekimoglu.com"
+authors:
+  - family-names: "FatihHekim0glu"
+keywords:
+  - crypto-arbitrage
+  - cross-exchange
+  - triangular-arbitrage
+  - market-microstructure
+  - order-book
+  - vwap
+  - transaction-costs
+  - quantitative-finance
+references:
+  - type: article
+    title: "The Deflated Sharpe Ratio: Correcting for Selection Bias, Backtest Overfitting, and Non-Normality"
+    authors:
+      - family-names: "Bailey"
+        given-names: "David H."
+      - family-names: "Lopez de Prado"
+        given-names: "Marcos"
+    journal: "The Journal of Portfolio Management"
+    year: 2014
+</content>
