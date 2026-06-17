@@ -1,0 +1,34 @@
+# Default cost profile — realistic public taker/withdrawal numbers for retail
+# (non-VIP) tiers as of 2025. Rates are FRACTIONS of notional (0.001 = 10 bps).
+# Withdrawal fees are flat, in units of the asset; network/latency drive the
+# settlement-risk penalty. These are reference data, not live-fetched.
+profile: default
+
+fees:
+  binance:
+    maker: 0.0010   # 10.0 bps
+    taker: 0.0010   # 10.0 bps
+  coinbase:
+    maker: 0.0040   # 40.0 bps (Advanced Trade retail tier)
+    taker: 0.0060   # 60.0 bps
+  kraken:
+    maker: 0.0016   # 16.0 bps
+    taker: 0.0026   # 26.0 bps
+
+transfers:
+  BTC:
+    withdrawal_flat: 0.0002      # ~$10 at $50k BTC
+    network_minutes: 30.0        # ~3 confirmations
+    latency_bps_per_min: 0.05
+  ETH:
+    withdrawal_flat: 0.003       # ~$9 at $3k ETH
+    network_minutes: 6.0
+    latency_bps_per_min: 0.05
+  USDT:
+    withdrawal_flat: 1.0         # ~$1 flat (ERC-20/TRC-20)
+    network_minutes: 5.0
+    latency_bps_per_min: 0.04
+  USDC:
+    withdrawal_flat: 1.0
+    network_minutes: 5.0
+    latency_bps_per_min: 0.04

@@ -1,0 +1,33 @@
+# Low cost profile — best-case VIP / high-volume taker tiers and fast networks.
+# Even at these floor costs the net edge on liquid pairs collapses; this profile
+# exists to show the headline survives the most generous cost assumptions.
+profile: low
+
+fees:
+  binance:
+    maker: 0.00000   # 0.0 bps (VIP 9 maker)
+    taker: 0.00017   # 1.7 bps  (VIP 9 taker)
+  coinbase:
+    maker: 0.0000    # 0.0 bps
+    taker: 0.0005    # 5.0 bps  (top tier)
+  kraken:
+    maker: 0.0000    # 0.0 bps
+    taker: 0.0010    # 10.0 bps (high-volume tier)
+
+transfers:
+  BTC:
+    withdrawal_flat: 0.0001
+    network_minutes: 20.0
+    latency_bps_per_min: 0.02
+  ETH:
+    withdrawal_flat: 0.0015
+    network_minutes: 4.0
+    latency_bps_per_min: 0.02
+  USDT:
+    withdrawal_flat: 0.5
+    network_minutes: 3.0
+    latency_bps_per_min: 0.02
+  USDC:
+    withdrawal_flat: 0.5
+    network_minutes: 3.0
+    latency_bps_per_min: 0.02

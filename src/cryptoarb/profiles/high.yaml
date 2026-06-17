@@ -1,0 +1,33 @@
+# High cost profile — conservative retail (no-fee-tier) taker costs and slow,
+# congested networks. This is the realistic bar for an actual retail REST trader;
+# the net edge is firmly negative here.
+profile: high
+
+fees:
+  binance:
+    maker: 0.0010   # 10.0 bps
+    taker: 0.0010   # 10.0 bps (base retail)
+  coinbase:
+    maker: 0.0060   # 60.0 bps (simple-trade-like retail)
+    taker: 0.0080   # 80.0 bps
+  kraken:
+    maker: 0.0025   # 25.0 bps
+    taker: 0.0040   # 40.0 bps (base tier)
+
+transfers:
+  BTC:
+    withdrawal_flat: 0.0005      # congested mempool, higher fee
+    network_minutes: 60.0        # ~6 confirmations under load
+    latency_bps_per_min: 0.10
+  ETH:
+    withdrawal_flat: 0.005       # high gas
+    network_minutes: 12.0
+    latency_bps_per_min: 0.10
+  USDT:
+    withdrawal_flat: 5.0         # ERC-20 under high gas
+    network_minutes: 10.0
+    latency_bps_per_min: 0.08
+  USDC:
+    withdrawal_flat: 5.0
+    network_minutes: 10.0
+    latency_bps_per_min: 0.08
