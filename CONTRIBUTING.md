@@ -48,9 +48,7 @@ no loops or data loads at import. Demos live behind `if __name__ == "__main__"`.
 
 - Use clear, present-tense commit messages.
 - **Do not** add machine-authorship attribution trailers: no co-author trailer
-  pointing at a code-generation assistant, no "generated with" line, no
-  robot-emoji attribution. The `.github/workflows/no-ai-attribution.yml` guard
-  fails any PR that contains them.
+  pointing at a code-generation assistant and no "generated with" line.
 
 ## Pull requests
 
