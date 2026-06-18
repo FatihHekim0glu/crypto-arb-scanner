@@ -49,7 +49,7 @@ def test_effective_n_trials_rejects_sub_one_factors(legs: int, grid: int) -> Non
 
 
 # --------------------------------------------------------------------------- #
-# net_edge_stats — DSR n_trials guard (>= pair-legs x fee-grid)               #
+# net_edge_stats - DSR n_trials guard (>= pair-legs x fee-grid)               #
 # --------------------------------------------------------------------------- #
 
 

@@ -1,9 +1,9 @@
-"""crypto-arb-scanner — a pure, typed crypto-arbitrage decomposition library.
+"""crypto-arb-scanner - a pure, typed crypto-arbitrage decomposition library.
 
 Decompose cross-exchange and triangular crypto spreads into a fee-, depth-, and
 transfer-cost-aware gross -> net waterfall. The honest headline is the COLLAPSE
 of the executable edge after taker fees + order-book-depth slippage + transfer
-cost — a diagnostic spread-decomposition tool, never a profit claim.
+cost - a diagnostic spread-decomposition tool, never a profit claim.
 
 The package has ZERO import-time side effects and ZERO UI coupling: ``ccxt`` and
 ``plotly`` are imported lazily inside the functions that need them, so the same

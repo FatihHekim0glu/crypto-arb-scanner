@@ -4,7 +4,7 @@ The live path lazily imports **async ccxt**, fetches L2 books with SHORT
 timeouts behind a token-bucket throttle, and on ANY failure (rate-limit,
 geo-block, timeout, symbol mismatch) degrades gracefully: first to a fresh
 cached snapshot, then to the deterministic synthetic generator. It must NEVER
-hard-fail — the deployed backend may attempt live data but always falls back.
+hard-fail - the deployed backend may attempt live data but always falls back.
 No test depends on live data; the whole module is exercised through the
 synthetic fallback.
 
@@ -111,7 +111,7 @@ class _TokenBucket:
     Capacity equals the per-second rate (burst of one second's worth); tokens
     refill continuously. :meth:`acquire` blocks just long enough to stay within
     ``rate_per_sec``. Pure-Python, no import-time work, deterministic given the
-    clock — but in practice it only ever runs on the (untested) live path.
+    clock - but in practice it only ever runs on the (untested) live path.
     """
 
     __slots__ = ("_capacity", "_last", "_rate", "_tokens")
@@ -189,7 +189,7 @@ def fetch_books(
     - ``"synthetic"``: skip the network entirely; return synthetic books.
     - ``"live"`` / ``"auto"``: attempt the live ccxt fetch; on ANY failure fall
       back to a fresh cache hit, then to synthetic. The function NEVER raises on
-      an upstream failure — it always returns *some* books and an honest
+      an upstream failure - it always returns *some* books and an honest
       ``data_source`` tag.
 
     ``ccxt`` is imported lazily inside this function; absence of ``ccxt`` is
@@ -262,7 +262,7 @@ def _read_cache(symbol: str, venues: list[str], cache: BookCache) -> dict[str, O
     """Return a complete cached snapshot for every venue, or ``None`` on any miss.
 
     A partial snapshot (some venues stale/absent) is treated as a full miss so a
-    cross-venue scan is never run on a half-stale book set — the staleness guard
+    cross-venue scan is never run on a half-stale book set - the staleness guard
     is all-or-nothing.
     """
     out: dict[str, OrderBook] = {}

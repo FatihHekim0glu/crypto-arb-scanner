@@ -176,7 +176,7 @@ def cost_sensitivity_figure(
 ) -> Figure:
     """Build a line chart of net edge versus added cost (bps).
 
-    Shows the net edge crossing zero as extra cost rises — the quantitative
+    Shows the net edge crossing zero as extra cost rises - the quantitative
     backbone of the "not executable via REST" caption.
 
     Parameters

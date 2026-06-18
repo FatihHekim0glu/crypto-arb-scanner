@@ -3,7 +3,7 @@
 The CLI is a thin shell over the pure compute library; ``typer`` is imported
 LAZILY inside :func:`build_app` (and the package's optional ``[viz]``/``[data]``
 extras are only needed by the commands that use them), so importing this module
-has no side effects. The two commands — :func:`scan` and :func:`replay` — are
+has no side effects. The two commands - :func:`scan` and :func:`replay` - are
 plain functions that compute and print; they require neither ``typer`` nor any
 network, so they are directly callable and testable on the synthetic path. The
 interactive demo lives behind the ``__main__`` guard.

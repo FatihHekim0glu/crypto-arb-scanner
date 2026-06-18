@@ -3,16 +3,16 @@
 Covers the invariants the brief pins for the order-book model, the walk-the-book
 VWAP, and the deterministic synthetic generator:
 
-- **Monotonicity** — a larger target notional ``Q`` yields a worse-or-equal VWAP
+- **Monotonicity** - a larger target notional ``Q`` yields a worse-or-equal VWAP
   (buy non-decreasing, sell non-increasing).
-- **Partial fill** — ``fully_filled`` is ``False`` exactly when ``Q`` exceeds the
+- **Partial fill** - ``fully_filled`` is ``False`` exactly when ``Q`` exceeds the
   book's total quotable depth.
-- **VWAP parity** — the kernel matches a hand-rolled reference walk to ``1e-9``.
-- **Scale-invariance** — scaling every price by a constant scales the VWAP by the
+- **VWAP parity** - the kernel matches a hand-rolled reference walk to ``1e-9``.
+- **Scale-invariance** - scaling every price by a constant scales the VWAP by the
   same constant.
-- **Determinism** — the synthetic generator emits byte-identical books for the
+- **Determinism** - the synthetic generator emits byte-identical books for the
   same arguments.
-- **Triangular no-arb identity** — three consistent legs multiply to ``1`` within
+- **Triangular no-arb identity** - three consistent legs multiply to ``1`` within
   ``1e-12``; a dislocation breaks it by the configured amount.
 """
 

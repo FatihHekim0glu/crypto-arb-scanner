@@ -1,8 +1,8 @@
 """End-to-end integration tests for the public :func:`cryptoarb.run_scan` scan.
 
 These run the WHOLE offline pipeline through the single public entrypoint the
-backend calls — books -> cross-exchange scan (depth-aware VWAP) -> cost
-waterfall -> net-edge series + verdict -> Plotly figures — on BOTH seeded
+backend calls - books -> cross-exchange scan (depth-aware VWAP) -> cost
+waterfall -> net-edge series + verdict -> Plotly figures - on BOTH seeded
 fixtures, with NO network and NO live data:
 
 - ``consistent_books`` (the honest null): no cross-venue dislocation, so the net

@@ -43,7 +43,7 @@ def test_depth_gate_forces_honest_null_when_size_exceeds_depth(
     ``dislocated_books`` carries a genuine positive gross spread, so at a small
     size it can read as marginal/feasible. But when the requested notional dwarfs
     the available depth, only a sliver is fillable and the headline net edge is
-    not achievable at size — the depth gate must force ``no_feasible_edge``.
+    not achievable at size - the depth gate must force ``no_feasible_edge``.
     """
     from cryptoarb import run_scan
 

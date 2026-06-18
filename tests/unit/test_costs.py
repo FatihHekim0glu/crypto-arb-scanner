@@ -255,7 +255,7 @@ def test_composite_cost_unknown_profile_raises() -> None:
 
 
 # --------------------------------------------------------------------------- #
-# build_waterfall — the gross -> net collapse                                 #
+# build_waterfall - the gross -> net collapse                                 #
 # --------------------------------------------------------------------------- #
 def _default_legs() -> tuple[FeeSchedule, FeeSchedule, TransferSchedule]:
     fees = load_fee_schedules("default")

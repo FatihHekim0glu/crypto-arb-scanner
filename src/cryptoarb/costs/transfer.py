@@ -66,8 +66,8 @@ def transfer_cost_bps(
 ) -> float:
     """Return the total transfer cost (bps) of moving ``notional_usd`` of the asset.
 
-    Combines the flat withdrawal fee — converted to bps via
-    ``1e4 * withdrawal_flat * asset_price_usd / notional_usd`` — with the latency
+    Combines the flat withdrawal fee - converted to bps via
+    ``1e4 * withdrawal_flat * asset_price_usd / notional_usd`` - with the latency
     penalty ``network_minutes * latency_bps_per_min``. Larger notionals dilute
     the flat fee's bps contribution; the latency penalty is notional-invariant.
 

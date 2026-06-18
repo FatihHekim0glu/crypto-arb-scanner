@@ -5,13 +5,13 @@ instances built from explicit sorted ``(price, size)`` ladders, so the suite
 shares identical synthetic books with known structure WITHOUT depending on the
 (stubbed) synthetic generator:
 
-- ``consistent_books`` — per-venue L2 books all centered on the same true mid
+- ``consistent_books`` - per-venue L2 books all centered on the same true mid
   with NO cross-venue dislocation, so the cross-exchange no-arb condition holds
   and the net edge is expected to collapse (the honest-null fixture).
-- ``dislocated_books`` — the same venues but with one venue skewed by a small
+- ``dislocated_books`` - the same venues but with one venue skewed by a small
   signed offset, manufacturing an *apparently* exploitable gap that the cost
   waterfall is expected to erase.
-- ``deep_vs_thin_book`` — a pair of books for the SAME mid where one side is deep
+- ``deep_vs_thin_book`` - a pair of books for the SAME mid where one side is deep
   and the other thin, used to pin the VWAP monotonicity / depth-realism guards.
 
 Importing this module has no side effects beyond fixture registration.
@@ -90,7 +90,7 @@ def consistent_books() -> dict[str, OrderBook]:
 
     All three venues straddle the same ``_TRUE_MID`` with their own symmetric
     half-spreads. The best bid on any venue sits below the best ask on every
-    venue, so no cross-exchange spread survives even before costs — the honest
+    venue, so no cross-exchange spread survives even before costs - the honest
     null on which ``net_bps`` must be ``<= 0`` / ``no_feasible_edge``.
     """
     return {
@@ -105,7 +105,7 @@ def dislocated_books() -> dict[str, OrderBook]:
     """Three books where one venue is skewed to fake a small exploitable gap.
 
     ``kraken``'s mid is shifted up by ~8 bps, so its bids sit above the other
-    venues' asks at the top of book — an *apparent* cross-exchange opportunity.
+    venues' asks at the top of book - an *apparent* cross-exchange opportunity.
     The headline claim is that the cost waterfall erases it; this fixture is the
     input that proves the collapse rather than the absence of a raw spread.
     """

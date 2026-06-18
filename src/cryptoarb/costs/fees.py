@@ -1,6 +1,6 @@
 """Per-venue maker/taker fee schedules.
 
-Fees are REAL schedules, never zeroed — zeroing fees is the classic way to
+Fees are REAL schedules, never zeroed - zeroing fees is the classic way to
 manufacture a phantom edge. A :class:`FeeSchedule` holds a venue's maker and
 taker rates (as fractions, e.g. ``0.001`` = 10 bps); a cross-exchange leg pays
 taker on BOTH sides by default. Schedules are loaded from the reference

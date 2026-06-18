@@ -4,7 +4,7 @@ This is the backbone of the offline test suite. Given a true mid, per-venue
 spread/offset/depth parameters, and a seed, it emits internally consistent
 per-venue L2 books. With **no cross-venue dislocation** every venue is centered
 on the same true mid (up to its own half-spread), so the cross-exchange no-arb
-condition holds and the net edge collapses — the honest-null fixture. A small
+condition holds and the net edge collapses - the honest-null fixture. A small
 dislocation can be injected to produce an *apparently* exploitable gap that the
 cost waterfall is expected to erase.
 
@@ -28,8 +28,8 @@ from cryptoarb.books.model import OrderBook
 
 #: Significant figures retained when rounding generated prices. Rounding to
 #: significant figures (not fixed decimals) keeps ladders clean and strictly
-#: monotone at ANY price scale — from ~50_000 (BTC) down to the ~1e-8 third leg
-#: of a triangular cycle — where fixed-decimal rounding would collapse adjacent
+#: monotone at ANY price scale - from ~50_000 (BTC) down to the ~1e-8 third leg
+#: of a triangular cycle - where fixed-decimal rounding would collapse adjacent
 #: levels onto the same grid value and break the strict-ordering invariant.
 _PRICE_SIG_FIGS: int = 12
 
@@ -308,7 +308,7 @@ def consistent_triangular_books(
     """Generate three single-venue books forming a triangular cycle ``A/B·B/C·C/A``.
 
     The third leg's mid is set to ``1 / (mid_ab * mid_bc)`` so the product of the
-    three mids is exactly ``1`` — the no-arb identity that the parity suite
+    three mids is exactly ``1`` - the no-arb identity that the parity suite
     checks to ``1e-12`` when ``dislocation_bps == 0``. A non-zero
     ``dislocation_bps`` perturbs the ``C/A`` mid to break the identity by a known
     amount.

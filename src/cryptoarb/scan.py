@@ -1,4 +1,4 @@
-"""Public end-to-end scan entrypoint — the seam the backend router calls.
+"""Public end-to-end scan entrypoint - the seam the backend router calls.
 
 This module wires the six module groups into ONE coherent pipeline:
 
@@ -22,7 +22,7 @@ the noise band or its lower confidence bound includes zero.
 
 Importing this module has ZERO side effects: ``plotly`` is imported lazily inside
 the figure helpers (via :mod:`cryptoarb.plots`) and ``ccxt`` is never touched
-here at all — the data layer owns that decision.
+here at all - the data layer owns that decision.
 """
 
 from __future__ import annotations
@@ -68,7 +68,7 @@ class ScanSummary:
     gross_bps:
         The best executable (depth-aware) cross-exchange gross spread, in bps.
     net_bps:
-        The net edge after the full cost waterfall — the honest headline number.
+        The net edge after the full cost waterfall - the honest headline number.
     fillable_notional:
         The notional fully fillable across both legs of the best pair, in USD.
     dominant_cost_leg:
@@ -138,7 +138,7 @@ class ScanResult:
 
     summary: ScanSummary
     best: ArbResult
-    waterfall: Any  # Waterfall — Any keeps this module free of an import cycle.
+    waterfall: Any  # Waterfall - Any keeps this module free of an import cycle.
     pair_net_bps: tuple[float, ...]
     pair_gross_bps: tuple[float, ...]
     cost_sensitivity: tuple[Any, ...]  # tuple[CostSensitivityPoint, ...]
@@ -218,7 +218,7 @@ def run_scan(
 
     This is THE public entrypoint the backend router calls. It does not touch the
     network: the caller supplies books either directly (``books``) or via a
-    zero-argument ``books_loader`` that returns ``(books, data_source)`` — the
+    zero-argument ``books_loader`` that returns ``(books, data_source)`` - the
     backend wires that to ``fetch_books`` so the lazy-``ccxt`` / synthetic-fallback
     decision stays in the data layer and NEVER becomes a hard dependency of this
     pure pipeline.
@@ -287,7 +287,7 @@ def run_scan(
         resolved_books, data_source = books, "synthetic"
 
     # Restrict to the requested venues (preserving the caller's intent) and demand
-    # at least two — a cross-exchange scan is undefined on a single venue.
+    # at least two - a cross-exchange scan is undefined on a single venue.
     selected = {venue: resolved_books[venue] for venue in venues if venue in resolved_books}
     if len(selected) < 2:
         raise ValidationError(

@@ -19,7 +19,7 @@ from cryptoarb._exceptions import ValidationError
 # The three reference profiles bundled with the package.
 KNOWN_PROFILES: tuple[str, ...] = ("default", "low", "high")
 
-# Profiles live in the top-level package, not in costs/ — they are shared with
+# Profiles live in the top-level package, not in costs/ - they are shared with
 # any other consumer (CLI, backend) that needs the raw reference numbers.
 _PROFILE_PACKAGE = "cryptoarb.profiles"
 

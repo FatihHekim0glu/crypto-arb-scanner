@@ -1,6 +1,6 @@
 """Smoke tests: the package imports cleanly and stubs expose their contracts.
 
-These are deliberately minimal — they guard import-purity and the public API
+These are deliberately minimal - they guard import-purity and the public API
 surface while the real behaviour is filled in by parallel authors. They must
 keep passing for the build to stay green.
 """
