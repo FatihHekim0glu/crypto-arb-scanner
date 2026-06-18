@@ -47,9 +47,10 @@ no loops or data loads at import. Demos live behind `if __name__ == "__main__"`.
 ## Commit hygiene
 
 - Use clear, present-tense commit messages.
-- **Do not** add AI-attribution trailers — no `Co-Authored-By: Claude`,
-  no "Generated with Claude", no robot-emoji attribution lines. The
-  `.github/workflows/no-ai-attribution.yml` guard fails any PR that contains them.
+- **Do not** add machine-authorship attribution trailers: no co-author trailer
+  pointing at a code-generation assistant, no "generated with" line, no
+  robot-emoji attribution. The `.github/workflows/no-ai-attribution.yml` guard
+  fails any PR that contains them.
 
 ## Pull requests
 

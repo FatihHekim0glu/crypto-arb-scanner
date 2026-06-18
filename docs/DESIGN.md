@@ -69,11 +69,11 @@ import-purity test. `ccxt` is imported lazily inside data-layer functions, and
 
 Copied verbatim from the HRP infra and renamed `hrp` → `cryptoarb`:
 
-- `_constants.py` — shared scalar constants; one source of truth.
-- `_validation.py` — input guards (shape, finiteness, sufficient observations).
-- `_typing.py` / `_exceptions.py` — shared aliases and the exception taxonomy
+- `_constants.py`: shared scalar constants; one source of truth.
+- `_validation.py`: input guards (shape, finiteness, sufficient observations).
+- `_typing.py` / `_exceptions.py`: shared aliases and the exception taxonomy
   (base `CryptoArbError` with `BookError` / `LiquidityError` / `ValidationError`).
-- `_manifest.py` / `_rng.py` — `RunManifest` (BLAKE2b config-hash) plus seeded
+- `_manifest.py` / `_rng.py`: `RunManifest` (BLAKE2b config-hash) plus seeded
   PCG64 substreams. The manifest makes a run reproducible; the same seed yields
   byte-identical books.
 
@@ -81,8 +81,8 @@ Copied verbatim from the HRP infra and renamed `hrp` → `cryptoarb`:
 
 `model.py` is a frozen `OrderBook` dataclass: canonically sorted `(price, size)`
 bid/ask ladders with a `ts_ms` exchange timestamp carried for the replay
-staleness guard (never used in compute). `vwap.py` walks the book — buy consumes
-asks, sell consumes bids — to an **executable** average fill price for a target
+staleness guard (never used in compute). `vwap.py` walks the book (buy consumes
+asks, sell consumes bids) to an **executable** average fill price for a target
 notional `Q`, returning `(avg_price, filled_notional, fully_fillable)`. Pricing at
 VWAP, not top of book, is [ADR-0001](decisions/0001-vwap-depth-not-top-of-book.md).
 `synthetic.py` is the deterministic consistent-book generator: per-venue L2 books
@@ -100,12 +100,12 @@ gross/executable/net bps and the legs.
 ### `costs/`
 
 `fees.py` loads per-venue maker/taker schedules and computes the **round-trip
-taker** cost (both legs always pay taker — never zeroed). `transfer.py` loads
+taker** cost (both legs always pay taker, never zeroed). `transfer.py` loads
 per-asset withdrawal + network/settlement schedules and amortizes them to bps
 (flat withdrawal fee diluted by notional, plus a notional-invariant
 latency-decay penalty). `waterfall.py` assembles the headline: `gross →
 −taker_fees → −transfer → net`, with slippage already baked into `gross` by the
-VWAP walk (so it is *not* a separate stage — double-counting would understate the
+VWAP walk (so it is *not* a separate stage; double-counting would understate the
 edge). This is [ADR-0002](decisions/0002-gross-to-net-waterfall.md). A
 `CompositeCost` bundles both schedules from one profile (`default` / `low` /
 `high`) so callers configure costs once.
@@ -113,7 +113,7 @@ edge). This is [ADR-0002](decisions/0002-gross-to-net-waterfall.md). A
 ### `evaluation/`
 
 `dsr.py` (reused) computes the Probabilistic and Deflated Sharpe ratios
-(Bailey–LdP, 2014) with the full-grid `n_trials`. `netedge.py` builds the
+(Bailey and LdP, 2014) with the full-grid `n_trials`. `netedge.py` builds the
 per-pair net-edge series and enforces the honest multiplicity count
 `n_trials = pair_legs × fee_grid_points` (never `1`), plus the cost-sensitivity
 sweep. `verdict.py` is a **pure function** mapping the net-edge inference to a
@@ -156,7 +156,7 @@ per-venue L2 books  (synthetic generator, or live ─► cache ─► synthetic)
 ```
 
 The headline number is `net_bps`, and on the consistent (no-dislocation) fixture
-it is negative *before* the verdict is even consulted — the collapse is a property
+it is negative *before* the verdict is even consulted; the collapse is a property
 of the cost arithmetic, not of the labeling.
 
 ## Key invariants
@@ -187,18 +187,18 @@ The compute core guarantees, and tests enforce:
 
 Tests are partitioned by intent under `tests/`:
 
-- **`unit/`** — isolated kernels: fee/transfer math, the DSR/PSR functions, the
+- **`unit/`**: isolated kernels: fee/transfer math, the DSR/PSR functions, the
   verdict truth table, the `effective_n_trials` guard.
-- **`property/`** (Hypothesis) — the invariants above: net ≤ gross monotonicity,
+- **`property/`** (Hypothesis): the invariants above: net ≤ gross monotonicity,
   larger-`Q`-worse-VWAP, no-lookahead future-perturbation invariance, spread
   scale-invariance, cross-exchange leg-labeling symmetry.
-- **`parity/`** — golden checks against independent references: VWAP/L2
+- **`parity/`**: golden checks against independent references: VWAP/L2
   aggregation vs a hand-rolled reference at `1e-9`, the triangular no-arb identity
   at `1e-12`, DSR/PSR vs the reused `dsr.py` at `1e-10`.
-- **`regression/`** — the honest null, locked: consistent books ⇒ `net_bps ≤ 0` /
+- **`regression/`**: the honest null, locked: consistent books ⇒ `net_bps ≤ 0` /
   `no_feasible_edge`; a golden net-edge waterfall on a fixed synthetic snapshot;
   the no-lookahead replay case; the import-purity subprocess test.
-- **`integration/`** — end-to-end `run_scan` and CLI runs on synthetic data.
+- **`integration/`**: end-to-end `run_scan` and CLI runs on synthetic data.
 
 Seeded fixtures in `conftest.py` (`consistent_books`, `dislocated_books`,
 `deep_vs_thin_book`) give every layer deterministic, adversarial inputs. Coverage
@@ -213,8 +213,8 @@ returning the `summary` scalars plus Plotly `{data, layout}` figures (the gross 
 net waterfall and the spread distribution). `ccxt` is lazily imported inside the
 handler with short timeouts; **any** upstream failure degrades to synthetic and
 the handler never hard-fails (422 on validation, 502 only on a true *internal*
-error — never on an upstream miss). The frontend renders the figures and surfaces
+error, never on an upstream miss). The frontend renders the figures and surfaces
 the pure-derived `verdict` and a `data_source` badge as the first things a visitor
 reads, beside the honest caption "Net edge collapses after fees + depth +
-transfer — not executable via REST."
+transfer, not executable via REST."
 </content>
