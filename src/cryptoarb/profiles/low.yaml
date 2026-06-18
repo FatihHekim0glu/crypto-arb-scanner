@@ -1,4 +1,4 @@
-# Low cost profile — best-case VIP / high-volume taker tiers and fast networks.
+# Low cost profile - best-case VIP / high-volume taker tiers and fast networks.
 # Even at these floor costs the net edge on liquid pairs collapses; this profile
 # exists to show the headline survives the most generous cost assumptions.
 profile: low

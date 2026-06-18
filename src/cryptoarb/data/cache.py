@@ -59,7 +59,7 @@ class BookCache:
         OrderBook | None
             The cached book if present and within ``ttl_seconds``, else ``None``.
             A missing/corrupt entry or an unavailable ``diskcache`` backend is a
-            silent miss — the cache is a best-effort accelerator, never a hard
+            silent miss - the cache is a best-effort accelerator, never a hard
             dependency.
         """
         try:

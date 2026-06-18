@@ -1,4 +1,4 @@
-# Default cost profile — realistic public taker/withdrawal numbers for retail
+# Default cost profile - realistic public taker/withdrawal numbers for retail
 # (non-VIP) tiers as of 2025. Rates are FRACTIONS of notional (0.001 = 10 bps).
 # Withdrawal fees are flat, in units of the asset; network/latency drive the
 # settlement-risk penalty. These are reference data, not live-fetched.

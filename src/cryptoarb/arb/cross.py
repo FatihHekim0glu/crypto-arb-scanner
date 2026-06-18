@@ -40,7 +40,7 @@ class CrossLeg:
         The notional fully fillable on BOTH legs (the binding minimum), in quote
         units.
     gross_bps:
-        ``1e4 * (sell_vwap - buy_vwap) / buy_vwap`` — the executable gross spread.
+        ``1e4 * (sell_vwap - buy_vwap) / buy_vwap`` - the executable gross spread.
     """
 
     buy_venue: str

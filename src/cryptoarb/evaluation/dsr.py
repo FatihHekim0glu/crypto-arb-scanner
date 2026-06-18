@@ -1,7 +1,7 @@
 """Probabilistic and Deflated Sharpe ratios (Bailey & Lopez de Prado, 2014).
 
 These overfitting guards adjust a realized Sharpe ratio for sample length,
-non-normality (skew and kurtosis), and — for the Deflated Sharpe — the number of
+non-normality (skew and kurtosis), and - for the Deflated Sharpe - the number of
 configurations tried (multiple-testing / selection bias). The Deflated Sharpe is
 the honest yardstick that counts the FULL configuration grid as ``n_trials``.
 
@@ -192,7 +192,7 @@ def deflated_sharpe_ratio(
     HONESTY REQUIREMENT: ``n_trials`` must count the FULL explored configuration
     grid. For the arb scanner that is ``pair-legs x fee-grid-points`` (the number
     of venue-pair legs scanned times the number of fee/cost-sensitivity grid
-    points), NEVER ``1`` — a guard in :mod:`cryptoarb.evaluation.netedge` asserts
+    points), NEVER ``1`` - a guard in :mod:`cryptoarb.evaluation.netedge` asserts
     this. The PSR uses the FULL ``(\gamma_4)`` kurtosis term. The DSR is
     non-increasing in ``n_trials`` (monotonicity asserted in the property suite).
 

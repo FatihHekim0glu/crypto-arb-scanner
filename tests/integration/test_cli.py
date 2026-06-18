@@ -62,7 +62,7 @@ def test_scan_synthetic_smoke_prints_honest_null(capsys: pytest.CaptureFixture[s
 
     The consistent synthetic fixture has no exploitable cross-venue gap, so after
     fees + depth + transfer the net edge collapses and the verdict must be
-    ``no_feasible_edge`` — the CLI can never print a profit claim here.
+    ``no_feasible_edge`` - the CLI can never print a profit claim here.
     """
     scan(
         symbol="BTC/USDT",

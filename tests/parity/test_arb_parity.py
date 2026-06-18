@@ -92,7 +92,7 @@ def test_cross_leg_labeling_symmetry_same_mid(
     """At a SHARED mid, the two role orderings have EQUAL-MAGNITUDE gross.
 
     With both venues straddling the same true mid, you cross the spread in either
-    direction, so both ``cross_gross_bps`` orderings are (equally) negative — the
+    direction, so both ``cross_gross_bps`` orderings are (equally) negative - the
     pair has no rich side. The labeling is symmetric: ``|forward| ~= |reverse|``
     to well under a basis point, and neither orientation manufactures a gross
     edge out of the honest null.
@@ -115,7 +115,7 @@ def test_cross_leg_labeling_flips_sign_under_dislocation(
     With kraken skewed rich, buying binance / selling kraken is the profitable
     orientation (positive gross); reversing the roles is the loss side (negative
     gross). The exact magnitudes are not negatives of each other (the spread and
-    dislocation interact), but the sign must flip — the labeling is meaningful.
+    dislocation interact), but the sign must flip - the labeling is meaningful.
     """
     binance = dislocated_books["binance"]
     kraken = dislocated_books["kraken"]

@@ -11,7 +11,7 @@
 Public REST order books are **snapshots, not a live streaming feed**. When you
 poll Coinbase and Kraken for the same symbol you get two independently-timestamped
 pictures of the market taken a few hundred milliseconds apart. A raw cross-venue
-spread computed from a mismatched pair is then partly — sometimes entirely — a
+spread computed from a mismatched pair is then partly (sometimes entirely) a
 **timing artifact**: the "rich" venue's quote may simply be staler than the
 "cheap" venue's, and the gap closes the instant both refresh.
 
@@ -29,8 +29,8 @@ Two guards, both enforced on the timestamp (`ts_ms`) carried by every `OrderBook
    pinned by a property test: future-perturbing the books after `t` leaves the
    decision invariant.
 2. **Staleness embargo across venues.** A cross-venue scan is never run on a
-   half-stale book set. In the data layer, a partial snapshot — some venues
-   missing or older than the embargo window — is treated as a **full miss**, so the
+   half-stale book set. In the data layer, a partial snapshot (some venues
+   missing or older than the embargo window) is treated as a **full miss**, so the
    whole set degrades together rather than pairing a fresh quote on one venue with
    a stale one on another. We never mix live and stale/synthetic books across
    venues within a single scan.
@@ -49,6 +49,6 @@ price/cost computation.
 - **Cost.** Under flaky live connectivity, the embargo will degrade more scans to
   synthetic than a lenient "use whatever arrived" policy would. That is the
   intended trade: a correct null beats a contaminated positive.
-- **Risk addressed.** "REST staleness" — the README limitation — and the broader
+- **Risk addressed.** "REST staleness", the README limitation, and the broader
   look-ahead leakage class are both closed on the replay path.
 </content>

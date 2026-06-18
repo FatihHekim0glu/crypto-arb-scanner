@@ -10,8 +10,8 @@
 
 A cross-exchange "spread" can be measured two ways:
 
-1. **Top of book** — best ask on the cheap venue vs best bid on the rich venue.
-2. **Executable VWAP** — the size-weighted average fill price obtained by *walking
+1. **Top of book**: best ask on the cheap venue vs best bid on the rich venue.
+2. **Executable VWAP**: the size-weighted average fill price obtained by *walking
    the book* to a real target notional `Q`, consuming asks (buy) or bids (sell)
    level by level until `Q` is filled.
 
@@ -34,8 +34,8 @@ fillable notional reported to the caller is the binding minimum of the two legs'
 fills.
 
 Because slippage is *already baked into* the VWAP-walked gross spread, it is **not**
-a separate stage in the cost waterfall ([ADR-0002](0002-gross-to-net-waterfall.md))
-— charging it again would double-count and understate the edge.
+a separate stage in the cost waterfall ([ADR-0002](0002-gross-to-net-waterfall.md));
+charging it again would double-count and understate the edge.
 
 ## Consequences
 
@@ -45,11 +45,11 @@ a separate stage in the cost waterfall ([ADR-0002](0002-gross-to-net-waterfall.m
   non-negative). A `deep_vs_thin_book` fixture proves a thin book yields a
   materially worse VWAP and a partial fill past its depth.
 - **Positive.** Depth realism is the first thing that kills fake edges: a
-  +25 bps *top-of-book* gap on thin size routinely VWAPs to a far smaller — or
-  negative — executable spread before a single fee is charged.
+  +25 bps *top-of-book* gap on thin size routinely VWAPs to a far smaller (or
+  negative) executable spread before a single fee is charged.
 - **Cost.** The caller must supply a target notional `Q`; "the spread" is not a
   single number but a function of size. This is the honest framing, but it means
   every result is annotated with the `notional_usd` it was priced for.
-- **Risk addressed.** "Top-of-book over-claim" — the most common way crypto-arb
-  dashboards manufacture phantom profit — is structurally excluded.
+- **Risk addressed.** "Top-of-book over-claim", the most common way crypto-arb
+  dashboards manufacture phantom profit, is structurally excluded.
 </content>

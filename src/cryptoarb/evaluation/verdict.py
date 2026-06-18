@@ -2,7 +2,7 @@
 
 The headline verdict is a PURE FUNCTION of the net-edge inference. It is
 structurally unable to claim a feasible edge when the net bps are ``<= 0`` or
-within statistical noise of zero — this is what keeps the README honest. The
+within statistical noise of zero - this is what keeps the README honest. The
 truth table is unit-tested; the verdict is derived, never narrated.
 
 Importing this module has no side effects.
@@ -24,15 +24,15 @@ class Verdict(StrEnum):
     """
 
     #: Net edge is at or below zero, OR positive but statistically
-    #: indistinguishable from zero — the expected, honest outcome on liquid pairs.
+    #: indistinguishable from zero - the expected, honest outcome on liquid pairs.
     NO_FEASIBLE_EDGE = "no_feasible_edge"
 
     #: Net edge is positive and clears the noise band but not the (higher)
-    #: feasibility threshold — a borderline, do-not-trade-on-it signal.
+    #: feasibility threshold - a borderline, do-not-trade-on-it signal.
     MARGINAL = "marginal"
 
     #: Net edge is positive AND clears the feasibility threshold AND its lower
-    #: confidence bound is strictly above zero — a (rare) feasible edge.
+    #: confidence bound is strictly above zero - a (rare) feasible edge.
     FEASIBLE_EDGE = "feasible_edge"
 
 

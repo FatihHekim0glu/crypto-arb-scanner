@@ -17,6 +17,8 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 from cryptoarb._exceptions import ValidationError
+from cryptoarb.costs import fees as fees_mod
+from cryptoarb.costs import transfer as transfer_mod
 from cryptoarb.costs.fees import (
     FeeSchedule,
     load_fee_schedules,
@@ -85,6 +87,37 @@ def test_load_fee_schedules_unknown_profile_raises() -> None:
     """An unknown profile name is rejected, not silently defaulted."""
     with pytest.raises(ValidationError, match="unknown cost profile"):
         load_fee_schedules("nonexistent")
+
+
+def test_build_fee_schedule_rejects_non_mapping() -> None:
+    """A non-mapping entry for a venue is rejected with a clear message."""
+    with pytest.raises(ValidationError, match="must be a mapping"):
+        fees_mod._build_fee_schedule("binance", [0.001, 0.002])
+
+
+def test_build_fee_schedule_rejects_missing_key() -> None:
+    """A schedule missing the ``taker`` rate names the missing key."""
+    with pytest.raises(ValidationError, match="missing key 'taker'"):
+        fees_mod._build_fee_schedule("binance", {"maker": 0.001})
+
+
+def test_build_fee_schedule_rejects_non_numeric() -> None:
+    """A non-numeric rate is reported as such rather than crashing."""
+    with pytest.raises(ValidationError, match="non-numeric rate"):
+        fees_mod._build_fee_schedule("binance", {"maker": "free", "taker": 0.001})
+
+
+def test_build_fee_schedule_rejects_negative_rate() -> None:
+    """A negative fee (a fake rebate that could manufacture an edge) is rejected."""
+    with pytest.raises(ValidationError, match="negative rate"):
+        fees_mod._build_fee_schedule("binance", {"maker": -0.001, "taker": 0.001})
+
+
+def test_load_fee_schedules_rejects_profile_without_fees_section(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    """A profile that parses but lacks a usable ``fees`` section is a domain error."""
+    monkeypatch.setattr(fees_mod, "load_profile", lambda _profile: {"transfers": {}})
+    with pytest.raises(ValidationError, match="no usable 'fees' section"):
+        load_fee_schedules("default")
 
 
 def test_round_trip_taker_applies_each_leg_independently() -> None:
@@ -158,6 +191,41 @@ def test_load_transfer_schedules_unknown_profile_raises() -> None:
         load_transfer_schedules("bogus")
 
 
+def test_build_transfer_schedule_rejects_non_mapping() -> None:
+    with pytest.raises(ValidationError, match="must be a mapping"):
+        transfer_mod._build_transfer_schedule("BTC", 0.0002)
+
+
+def test_build_transfer_schedule_rejects_missing_key() -> None:
+    with pytest.raises(ValidationError, match="missing key 'network_minutes'"):
+        transfer_mod._build_transfer_schedule(
+            "BTC", {"withdrawal_flat": 0.0002, "latency_bps_per_min": 0.05}
+        )
+
+
+def test_build_transfer_schedule_rejects_non_numeric() -> None:
+    with pytest.raises(ValidationError, match="non-numeric value"):
+        transfer_mod._build_transfer_schedule(
+            "BTC",
+            {"withdrawal_flat": "free", "network_minutes": 30.0, "latency_bps_per_min": 0.05},
+        )
+
+
+def test_build_transfer_schedule_rejects_negative_value() -> None:
+    with pytest.raises(ValidationError, match="negative value"):
+        transfer_mod._build_transfer_schedule(
+            "BTC",
+            {"withdrawal_flat": 0.0002, "network_minutes": -30.0, "latency_bps_per_min": 0.05},
+        )
+
+
+def test_load_transfer_schedules_rejects_profile_without_transfers_section(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    """A profile lacking a usable ``transfers`` section is a domain error."""
+    monkeypatch.setattr(transfer_mod, "load_profile", lambda _profile: {"fees": {}})
+    with pytest.raises(ValidationError, match="no usable 'transfers' section"):
+        load_transfer_schedules("default")
+
+
 def test_transfer_schedule_to_dict() -> None:
     sched = TransferSchedule("ETH", 0.003, 6.0, 0.05)
     d = sched.to_dict()
@@ -187,7 +255,7 @@ def test_composite_cost_unknown_profile_raises() -> None:
 
 
 # --------------------------------------------------------------------------- #
-# build_waterfall — the gross -> net collapse                                 #
+# build_waterfall - the gross -> net collapse                                 #
 # --------------------------------------------------------------------------- #
 def _default_legs() -> tuple[FeeSchedule, FeeSchedule, TransferSchedule]:
     fees = load_fee_schedules("default")

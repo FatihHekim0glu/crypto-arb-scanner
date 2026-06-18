@@ -113,7 +113,7 @@ class Waterfall:
     gross_bps:
         The executable gross spread entering the waterfall.
     net_bps:
-        The net edge after all cost stages — the honest headline number.
+        The net edge after all cost stages - the honest headline number.
     stages:
         Ordered cost stages from ``gross`` to ``net`` (renders as the bar chart).
     dominant_cost_leg:

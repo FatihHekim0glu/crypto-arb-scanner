@@ -108,8 +108,8 @@ def assemble_arb_result(
     subtract round-trip taker fees and (optionally) transfer cost, and packs the
     result with its dominant cost leg.
 
-    The ``feasible`` flag is set conservatively here — ``True`` only when
-    ``net_bps > 0`` — so an :class:`ArbResult` can NEVER be flagged feasible on a
+    The ``feasible`` flag is set conservatively here - ``True`` only when
+    ``net_bps > 0`` - so an :class:`ArbResult` can NEVER be flagged feasible on a
     non-positive net edge regardless of any later thresholding. The authoritative
     verdict (with its noise band and confidence bound) is still produced by
     :func:`cryptoarb.evaluation.verdict.derive_verdict`; this flag is the

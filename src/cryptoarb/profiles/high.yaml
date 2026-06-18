@@ -1,4 +1,4 @@
-# High cost profile — conservative retail (no-fee-tier) taker costs and slow,
+# High cost profile - conservative retail (no-fee-tier) taker costs and slow,
 # congested networks. This is the realistic bar for an actual retail REST trader;
 # the net edge is firmly negative here.
 profile: high

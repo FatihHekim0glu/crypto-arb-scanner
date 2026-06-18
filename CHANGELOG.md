@@ -42,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `deep_vs_thin_book`); coverage gate `fail_under = 85`.
 - Documentation: honest negative-headline `README` with the actual synthetic
   waterfall numbers, validation table, and limitations; `docs/DESIGN.md`; ADRs
-  0001–0005; `CITATION.cff`; and the `no-ai-attribution` CI guard.
+  0001 to 0005; and `CITATION.cff`.
 
 [Unreleased]: https://github.com/FatihHekim0glu/crypto-arb-scanner/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/FatihHekim0glu/crypto-arb-scanner/releases/tag/v0.1.0

@@ -4,7 +4,7 @@ Decompose cross-exchange and triangular crypto spreads into a fee-, depth-, and
 transfer-cost-aware **gross → net waterfall**. This is a diagnostic
 spread-decomposition tool, **not** a money printer.
 
-## Honest headline — the gross → net collapse
+## Honest headline: the gross to net collapse
 
 Raw cross-exchange spreads on liquid pairs *look* profitable (a fabricated
 +25 bps gap is easy to find in snapshot data), but once you charge **round-trip
@@ -22,8 +22,8 @@ On the deterministic synthetic books shipped with the tests, scanning
 | +25 bps manufactured gap | +21.49 | −36.00 | −11.50 | **−26.01** | `no_feasible_edge` |
 | +40 bps manufactured gap | +36.49 | −36.00 | −11.50 | **−11.01** | `no_feasible_edge` |
 
-A standing **+25 bps** cross-exchange gap — the kind a naive top-of-book scanner
-reports as "free money" — nets **−26 bps** after costs. You would need a *durable*
+A standing **+25 bps** cross-exchange gap, the kind a naive top-of-book scanner
+reports as "free money", nets **−26 bps** after costs. You would need a *durable*
 ~+48 bps gap just to break even at default retail fees, and liquid-pair gaps that
 large do not sit still long enough for a REST round-trip to capture them.
 
@@ -119,7 +119,7 @@ Every claim above is pinned by a test. Each row maps an **oracle** to its
 | --- | --- | --- | --- |
 | VWAP / L2 aggregation | hand-rolled walk-the-book reference | `1e-9` | `tests/parity/test_arb_parity.py` |
 | Triangular no-arb identity | analytic `∏ rate = 1` on consistent books | `1e-12` | `tests/parity/test_arb_parity.py` |
-| DSR / PSR | reused `evaluation/dsr.py` (Bailey–LdP) | `1e-10` | `tests/unit/test_dsr.py` |
+| DSR / PSR | reused `evaluation/dsr.py` (Bailey and LdP) | `1e-10` | `tests/unit/test_dsr.py` |
 | Net edge ≤ gross edge | monotonicity (costs ≥ 0) | property (Hypothesis) | `tests/property/test_books_group.py` |
 | Larger notional ⇒ worse (or equal) VWAP | depth-realism monotonicity | property | `tests/property/test_books_group.py` |
 | No-lookahead replay | post-`t` quotes cannot change a decision at `t` | property | `tests/property/test_property_contracts.py` |
@@ -136,7 +136,7 @@ Every claim above is pinned by a test. Each row maps an **oracle** to its
   does not correct for that bias and does not claim to.
 - **Latency-arbitrage infeasibility.** Any residual positive net edge is a
   stale-quote artifact. Capturing it requires winning a microsecond race against
-  co-located HFT — infeasible for a retail REST client. The tool reports such
+  co-located HFT, infeasible for a retail REST client. The tool reports such
   cases as `marginal`/`feasible_edge` only under unrealistic best-case (`low`)
   costs, and the README headline labels them honestly as artifacts.
 - **REST staleness.** Public REST order books are *snapshots*, not a live
@@ -153,7 +153,7 @@ Every claim above is pinned by a test. Each row maps an **oracle** to its
 # 1. Environment (Python >= 3.11)
 uv venv && uv pip install -e '.[data,viz,dev]'
 
-# 2. Full quality gate — exactly what CI runs
+# 2. Full quality gate: exactly what CI runs
 uv run ruff check src tests
 uv run ruff format --check src tests
 uv run mypy --strict src/cryptoarb
@@ -187,7 +187,7 @@ byte-identical books, so the waterfall numbers above reproduce exactly. The same
 
 - Bailey, D. H. & López de Prado, M. (2014). *The Deflated Sharpe Ratio:
   Correcting for Selection Bias, Backtest Overfitting, and Non-Normality.* The
-  Journal of Portfolio Management. — the multiplicity-corrected yardstick used by
+  Journal of Portfolio Management. The multiplicity-corrected yardstick used by
   `evaluation/dsr.py`.
 - The classical **cross-exchange** and **triangular** no-arbitrage identities:
   a cross-venue spread that survives both legs' fees and transfer cost, and a

@@ -144,7 +144,6 @@ disallow_untyped_defs = false
 [[tool.mypy.overrides]]
 module = [
     "scipy.*",
-    "statsmodels.*",
     "ccxt.*",
     "diskcache.*",
     "plotly.*",
@@ -174,6 +173,10 @@ markers = [
 [tool.coverage.run]
 branch = true
 source = ["cryptoarb"]
+# The Typer CLI is a thin argument-parsing shell over run_scan and is exercised
+# end to end by the integration suite, not the offline unit gate; exclude it from
+# the core-logic coverage number.
+omit = ["src/cryptoarb/cli.py"]
 
 [tool.coverage.report]
 fail_under = 85

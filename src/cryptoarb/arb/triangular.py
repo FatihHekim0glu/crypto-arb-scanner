@@ -1,6 +1,6 @@
 """Single-venue triangular arbitrage scan.
 
-A triangular cycle on one venue chains three pairs — ``A/B``, ``B/C``, ``C/A`` —
+A triangular cycle on one venue chains three pairs - ``A/B``, ``B/C``, ``C/A``  - 
 so that converting one unit of ``A`` all the way around returns a quantity of
 ``A``. The **no-arb identity** is that the product of the three executable
 exchange rates equals ``1``; any deviation is the triangular gross edge. On the
@@ -37,7 +37,7 @@ class TriangularCycle:
     rate_product:
         The product of the three executable rates; ``1`` under no-arb.
     gross_bps:
-        ``1e4 * (rate_product - 1)`` — the triangular gross edge in bps.
+        ``1e4 * (rate_product - 1)`` - the triangular gross edge in bps.
     fillable_notional:
         The notional fully fillable around the whole cycle (binding minimum),
         in quote units of the entry leg.
