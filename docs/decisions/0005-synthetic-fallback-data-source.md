@@ -33,7 +33,7 @@ building and testing; the live `ccxt` path is best-effort and always degrades.
    mismatch) falls back: first to a fresh disk cache, then to the synthetic
    generator. The reported `data_source` literal is one of `live | cache |
    synthetic`, so a caller always knows the provenance.
-3. **Import purity.** `ccxt` is never imported at module load — only lazily inside
+3. **Import purity.** `ccxt` is never imported at module load, only lazily inside
    the data-layer functions that need it. The `src/cryptoarb` tree has zero
    import-time side effects (no network, no RNG draw), enforced by a subprocess
    import-purity test.

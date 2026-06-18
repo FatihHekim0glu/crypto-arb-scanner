@@ -1,4 +1,4 @@
-# ADR-0004: An honest null — the verdict cannot claim a feasible edge
+# ADR-0004: An honest null, the verdict cannot claim a feasible edge
 
 - **Status:** Accepted
 - **Date:** 2026-06-17
@@ -11,7 +11,7 @@
 The headline of this tool is a **negative result**: on liquid pairs the net
 executable cross-exchange edge collapses to ~0 or negative after costs. The
 failure mode for any such tool is *narrating* a positive conclusion the numbers do
-not support — eyeballing a residual `+3 bps`, calling it "a small but real edge,"
+not support: eyeballing a residual `+3 bps`, calling it "a small but real edge,"
 and quietly omitting that it is inside the noise or that its confidence interval
 straddles zero. A negative headline is only credible if the verdict is **derived,
 not narrated**, and is *structurally incapable* of over-claiming.
@@ -29,7 +29,7 @@ else:   →  MARGINAL
 
 - **The null branch is checked first and dominates.** Whenever the net edge is at
   or below the noise band, *or* its lower confidence bound includes zero, the
-  function returns `NO_FEASIBLE_EDGE` — regardless of any point estimate. It is
+  function returns `NO_FEASIBLE_EDGE`, regardless of any point estimate. It is
   *structurally impossible* for the function to return `FEASIBLE_EDGE` when
   `net_bps ≤ 0` or the CI straddles zero. This is stated as a HONESTY REQUIREMENT
   in the docstring and pinned by a truth-table unit test.
@@ -45,7 +45,7 @@ else:   →  MARGINAL
 ## Consequences
 
 - **Positive.** On the consistent (no-dislocation) synthetic fixture, `net_bps` is
-  negative and the verdict is `no_feasible_edge` — the honest null is locked by a
+  negative and the verdict is `no_feasible_edge`; the honest null is locked by a
   regression test. A feasible verdict is reachable *only* with a large, durable
   gross dislocation under best-case (`low`) costs, exactly the artifact the README
   labels as latency-arb.
@@ -54,6 +54,6 @@ else:   →  MARGINAL
 - **Cost.** The verdict is intentionally conservative: a genuinely tradeable edge
   near the threshold reads as `marginal`/`no_feasible_edge`. For a diagnostic that
   must not over-claim, false-negative-leaning is the correct bias.
-- **Risk addressed.** "Narrated optimism" — concluding a positive edge the
-  statistics do not support — is made structurally impossible.
+- **Risk addressed.** "Narrated optimism", concluding a positive edge the
+  statistics do not support, is made structurally impossible.
 </content>

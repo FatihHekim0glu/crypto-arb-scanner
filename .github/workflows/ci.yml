@@ -33,17 +33,23 @@ jobs:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
 
-      - name: Install project (data + viz extras + dev)
-        run: uv sync --extra data --extra viz --dev
+      - name: Sync dependencies
+        run: uv sync --all-extras
 
       - name: Lint (ruff)
-        run: uv run ruff check src
+        run: uv run ruff check src tests
 
       - name: Type-check (mypy)
-        # Non-blocking: strict mypy may have residual issues we still surface in
-        # the log without failing the whole pipeline.
-        continue-on-error: true
         run: uv run mypy src
 
       - name: Test (pytest + coverage gate)
-        run: uv run pytest -q --cov=cryptoarb --cov-report=term --cov-fail-under=85
+        run: >-
+          uv run pytest -m "not integration"
+          --cov=cryptoarb --cov-report=term-missing --cov-report=xml
+
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.12'
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false

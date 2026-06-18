@@ -15,12 +15,12 @@ honest *and* legible, the cost decomposition has to satisfy two competing
 constraints:
 
 1. **No cost is missing.** Round-trip taker fees on *both* legs and the
-   withdrawal/network transfer cost must always be charged — never zeroed, never
+   withdrawal/network transfer cost must always be charged, never zeroed, never
    assumed away with a generous fee tier.
 2. **No cost is double-counted.** Depth slippage is *already inside* the
    VWAP-walked gross spread ([ADR-0001](0001-vwap-depth-not-top-of-book.md)). If we
    also subtracted a separate "slippage" stage we would charge it twice and
-   understate the net edge — which would *exaggerate* the collapse and make the
+   understate the net edge, which would *exaggerate* the collapse and make the
    tool dishonest in the pessimistic direction.
 
 ## Decision
@@ -55,7 +55,7 @@ A property test guarantees `net_bps ≤ gross_bps` (costs are non-negative).
 - **Positive.** The waterfall renders directly as the headline bar chart, and the
   net number is defensible stage by stage. On a +25 bps manufactured gap the
   default-profile waterfall reads `+21.5 → −36.0 (fees) → −11.5 (transfer) =
-  −26.0 bps` — fees alone exceed the spread.
+  −26.0 bps`; fees alone exceed the spread.
 - **Positive.** Excluding a separate slippage stage keeps the tool from cheating
   *in its own favor's opposite direction*; the collapse is exactly as deep as the
   arithmetic says, no deeper.
